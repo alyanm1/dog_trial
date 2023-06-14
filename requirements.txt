@@ -44,7 +44,7 @@ exceptiongroup==1.1.1
 executing==1.2.0
 fastapi==0.97.0
 fastjsonschema==2.17.1
-Flask==2.3.2
+Flask==2.2.5
 flatbuffers==23.5.26
 fonttools==4.39.4
 fqdn==1.5.1
