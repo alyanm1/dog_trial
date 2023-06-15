@@ -8,6 +8,7 @@ import io
 from io import BytesIO, BufferedReader
 from io import BytesIO
 import numpy as np
+import requests
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY], suppress_callback_exceptions=True)
 
@@ -28,7 +29,7 @@ app.layout = html.Div(
             style={'textAlign': 'center'}
         ),
         html.H4(
-            "Who's that doggie in the window?",
+            "What's that doggie in the window?",
             style={
                 'text-align': 'center',
                 'font-family': 'Gill Sans',
@@ -48,7 +49,9 @@ app.layout = html.Div(
                                 style={
                                     'background-color': '#bde6d3',
                                     'color': 'white',
-                                    'font-family': 'Verdana'
+                                    'font-family': 'Verdana',
+                                    'text-align': 'center',
+                                    'font-weight':'bold'
                                 }
                             ),
                             dbc.CardBody(
@@ -93,7 +96,7 @@ app.layout = html.Div(
                 html.Div(
                     [
                         dbc.Button(
-                            'Find the breed!',
+                            'Send my photo!',
                             color='primary',
                             id='process-file-btn',
                             n_clicks=0
@@ -110,8 +113,31 @@ app.layout = html.Div(
                     id='loading-animation',
                     style={'textAlign': 'center', 'margin-top': '20px'}
                 ),
-                html.Div(id='api-text', children=html.P('API Response Text')),
-                html.Div(id='output-data')
+                html.Div(
+                    [
+                        dbc.Button(
+                            'Tell me the breed!',
+                            color='primary',
+                            id='api-btn',
+                            n_clicks=0
+                        )
+                    ],
+                    style={
+                        'display': 'flex',
+                        'justify-content': 'center',
+                        'margin-bottom': '20px',
+                        'font-family': 'Verdana'
+                    }
+                ),
+                html.Div(id='api-text', children=html.P('Made by. Happy Hippos')),
+                html.Div(id='output-data',
+                         style={
+                'text-align': 'center',
+                'font-family': 'Verdana',
+                'font-size': '45px',
+                'color': '#007864',
+                'font-weight':'bold'
+            })
             ]
         )
     ]
@@ -152,7 +178,8 @@ def process_image(contents, filenames, last_modified):
 )
 
 def update_loading_animation(n_clicks):
-    if n_clicks > 0:
+    print("update_loading_animation", n_clicks)
+    if n_clicks % 2 == 1:
         #gif_path = gif_path  # Update with the correct path relative to the assets directory
         return html.Div(
             [
@@ -167,98 +194,49 @@ def update_loading_animation(n_clicks):
     else:
         return html.Div()
 
-
-@app.callback(
-    Output('loading-animation', 'style'),
-    Output('api-text', 'style'),
-    Input('api-response', 'children')
-)
-
-def update_visibility(api_response):
-    loading_animation_style = {'display': 'none'}
-    api_text_style = {'display': 'none'}
-    
-    if api_response is not None:
-        loading_animation_style = {'display': 'none'}
-        api_text_style = {'display': 'block'}
-    
-    return loading_animation_style, api_text_style
-
 @app.callback(
     Output('output-data', 'children'),
-    [Input('process-file-btn', 'n_clicks')],
+    [Input('api-btn', 'n_clicks')],
     [State('upload-image', 'contents'),
      State('upload-image', 'filename')]
 )
 
 def process_file(n_clicks, contents, filenames):
+    print("hide imag", n_clicks)
+    
+    if n_clicks > 0:
+        update_loading_animation(0)
+    
     if n_clicks > 0 and contents and filenames:
-        corrected_images = []
         output_children = []  # Initialize the output_children list
         
         for content, filename in zip(contents, filenames):
-    # Append the loading animation to the output_children list
-            output_children.append(
-        html.Div([
-            html.Img(
-                src=gif_path,
-                style={'height': '100px', 'width': '100px'}
-            ),
-            html.H5("Processing Image...")
-        ],
-        style={'textAlign': 'center', 'margin-top': '20px'})
-    )
+   
+            with open(filename, 'wb') as f:
+                    f.write(content.encode('utf8'))
             
-            # Save the uploaded image to a file
-        # with open(filename, 'wb') as f:
-        #         f.write(content.encode('utf8'))
-            
-            # Make the API request to correct the image
-            bytes = base64.b64decode(content.split(',')[1]) 
+        bytes = base64.b64decode(content.split(',')[1]) 
 
-            img = Image.open(io.BytesIO(bytes))
-            
+        img = Image.open(io.BytesIO(bytes))
+        
 
-            img = img.resize((224, 224))
-            arr = np.array(img)
-            arr_shape = str(arr.shape)
-            arr_dtype = str(arr.dtype)
-            arr_bytes = arr.tobytes(
-                
-            )
-            # response = requests.post(
-            #         'https://api.api-ninjas.com/v1/imagetotext',
-            #         # files={'image_file': open(filename, 'rb')},
-            #         files={'image_file': img},
-            #         data={'size': 'auto'},
-            #         headers={'X-Api-Key': 'b2IS/u8gTTcE8G5UoUCi9g==diUhJcMKPf11xAsH'},
-            #     )
-            output_children = html.Div(f"{arr_shape, arr_dtype, arr_bytes}")
-            # output_children = html.Div(f"")
+        img = img.resize((224, 224))
+        arr = np.array(img)
+        arr_shape = str(arr.shape)
+        arr_dtype = str(arr.dtype)
+        arr_bytes = arr.tobytes()
+        files = {"my_file": arr_bytes}
+        data_dic = {'shape': arr_shape, "dtype": arr_dtype}
         
+        output = requests.post("https://dog-pred-nq4ekl2z7q-nw.a.run.app/predict", data = data_dic, files = files)
         
-        # if response.status_code == 200:
-        #         # Save the corrected image to a file
-        #         corrected_filename = f'corrected_{filename}'
-        #         with open(corrected_filename, 'wb') as out:
-        #             out.write(response.content)
-                
-        #         corrected_images.append(corrected_filename)
-                
-        #         api_text = response.json().get('text')
-                
-        #         output_children.append(html.P(api_text))
-        
-        # if corrected_images:
-        #     output_children += [
-        #         html.Div([
-        #             html.H5("Corrected Image"),
-        #             html.Img(src=corrected_image),
-        #             html.Hr()
-        #         ]) for corrected_image in corrected_images
-        #     ]
-        # else:
-        #     output_children = html.Div(f"{type(img)}")
+        word_in_string = eval(output.json()["response"])
+        if len(word_in_string) == 1:
+            final = word_in_string
+            output_children = html.Div(f"This dog is a {final[0]}!")
+        else:
+            final = ", ".join(word_in_string[::-1])
+            output_children = html.Div(f"These dogs are {final}!")
         
         return output_children
     
