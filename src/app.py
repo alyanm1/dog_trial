@@ -13,14 +13,14 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY], suppress_call
 
 server = app.server
 
-gif_path = "/Users/alya/code/alyanm1/dog_trial/assets/loading.gif"
+gif_path = "assets/loading.gif"
 
 app.layout = html.Div(
     [
         html.Div(
             [
                 html.Img(
-                    src=dash.get_asset_url('/Users/alya/code/alyanm1/dog_trial/assets/Logo.png'),
+                    src=dash.get_asset_url('Logo.png'),
                     style={'height': '40%', 'width': '40%'}
                 )
             ],
@@ -264,7 +264,7 @@ def process_file(n_clicks, contents, filenames):
     return []
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, host='0.0.0.0', port=8080)
     
     
     
