@@ -1,11 +1,7 @@
-dash
-dash-bootstrap-components
-dash-core-components
-dash-gif-component
-dash-html-components
-dash-iconify
-dash-mantine-components
-dash-table
+dash==2.8.1
+dash_bootstrap_components==1.4.1
+numpy==1.24.3
+Pillow==9.5.0
+gunicorn
+pandas
 dash-tools
-pillow
-numpy
