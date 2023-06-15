@@ -5,7 +5,11 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import requests 
 import base64
-from API import predict_image
+from PIL import Image
+from io import BytesIO, BufferedReader
+from io import BytesIO
+import io
+import numpy as np
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY], suppress_callback_exceptions=True)
 
@@ -207,39 +211,55 @@ def process_file(n_clicks, contents, filenames):
     )
             
             # Save the uploaded image to a file
-        with open(filename, 'wb') as f:
-                f.write(content.encode('utf8'))
+        # with open(filename, 'wb') as f:
+        #         f.write(content.encode('utf8'))
             
             # Make the API request to correct the image
-        response = requests.post(
-                'https://api.remove.bg/v1.0/removebg',
-                files={'image_file': open(filename, 'rb')},
-                data={'size': 'auto'},
-                headers={'X-Api-Key': 'WuhU7hKwGiPcMWn4HZFSVfo9'},
-            )
+            bytes = base64.b64decode(content.split(',')[1]) 
+
+            img = Image.open(io.BytesIO(bytes))
             
-        if response.status_code == 200:
-                # Save the corrected image to a file
-                corrected_filename = f'corrected_{filename}'
-                with open(corrected_filename, 'wb') as out:
-                    out.write(response.content)
+
+            img = img.resize((224, 224))
+            arr = np.array(img)
+            arr_shape = str(arr.shape)
+            arr_dtype = str(arr.dtype)
+            arr_bytes = arr.tobytes(
                 
-                corrected_images.append(corrected_filename)
-                
-                api_text = response.json().get('text')
-                
-                output_children.append(html.P(api_text))
+            )
+            # response = requests.post(
+            #         'https://api.api-ninjas.com/v1/imagetotext',
+            #         # files={'image_file': open(filename, 'rb')},
+            #         files={'image_file': img},
+            #         data={'size': 'auto'},
+            #         headers={'X-Api-Key': 'b2IS/u8gTTcE8G5UoUCi9g==diUhJcMKPf11xAsH'},
+            #     )
+            output_children = html.Div(f"{arr_shape, arr_dtype, arr_bytes}")
+            # output_children = html.Div(f"")
         
-        if corrected_images:
-            output_children += [
-                html.Div([
-                    html.H5("Corrected Image"),
-                    html.Img(src=corrected_image),
-                    html.Hr()
-                ]) for corrected_image in corrected_images
-            ]
-        else:
-            output_children = html.Div("Error occurred during image correction")
+        
+        # if response.status_code == 200:
+        #         # Save the corrected image to a file
+        #         corrected_filename = f'corrected_{filename}'
+        #         with open(corrected_filename, 'wb') as out:
+        #             out.write(response.content)
+                
+        #         corrected_images.append(corrected_filename)
+                
+        #         api_text = response.json().get('text')
+                
+        #         output_children.append(html.P(api_text))
+        
+        # if corrected_images:
+        #     output_children += [
+        #         html.Div([
+        #             html.H5("Corrected Image"),
+        #             html.Img(src=corrected_image),
+        #             html.Hr()
+        #         ]) for corrected_image in corrected_images
+        #     ]
+        # else:
+        #     output_children = html.Div(f"{type(img)}")
         
         return output_children
     
