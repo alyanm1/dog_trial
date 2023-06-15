@@ -28,7 +28,6 @@ dash-mantine-components==0.10.2
 dash-table==5.0.0
 dash-tools==1.11.1
 keras
-Keras-Preprocessin
 pillow
 tqdm
 opencv-python
