@@ -17,6 +17,7 @@ gif_path = "assets/loading.gif"
 
 app.layout = html.Div(
     [
+        
         html.Div(
             [
                 html.Img(
