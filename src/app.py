@@ -13,14 +13,14 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.MINTY], suppress_call
 
 server = app.server
 
-gif_path = "/Users/alya/code/AtinDhawan/DOG_IDENTIFIER/Assets/loading.gif"
+gif_path = "/Users/alya/code/alyanm1/dog_trial/assets/loading.gif"
 
 app.layout = html.Div(
     [
         html.Div(
             [
                 html.Img(
-                    src=dash.get_asset_url('Logo.png'),
+                    src=dash.get_asset_url('/Users/alya/code/alyanm1/dog_trial/assets/Logo.png'),
                     style={'height': '40%', 'width': '40%'}
                 )
             ],
@@ -152,7 +152,7 @@ def process_image(contents, filenames, last_modified):
 
 def update_loading_animation(n_clicks):
     if n_clicks > 0:
-        gif_path = '/assets/loading.gif'  # Update with the correct path relative to the assets directory
+        #gif_path = gif_path  # Update with the correct path relative to the assets directory
         return html.Div(
             [
                 html.Img(
